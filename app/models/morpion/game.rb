@@ -1,10 +1,15 @@
 module Morpion
   class Box
-    attr_accessor :i, :j, :player
+    attr_accessor :i, :j, :player, :alignments
     def initialize(i:, j:)
       self.i = i
       self.j = j
       self.player = :none
+      self.alignments = []
+    end
+    def belongs_to(alignment)
+      alignment.boxes << self
+      alignments << alignment
     end
     def to_s
       case player
@@ -19,11 +24,40 @@ module Morpion
   end
 
   class Board
-    attr_accessor :boxes
+    attr_accessor :boxes, :alignments
     def initialize
       self.boxes = []
       (0 .. 9).each do |i|
         self.boxes << (0 .. 9).map { |j| Box.new(i: i, j: j) }
+      end
+      self.alignments = []
+      (0 .. 9).each do |i|
+        (0 .. 5).each do |j|
+          alignment = Alignment.new
+          (0 .. 4).each { |k| self.boxes[i][j + k].belongs_to(alignment) }
+          self.alignments << alignment
+        end
+      end
+      (0 .. 5).each do |i|
+        (0 .. 9).each do |j|
+          alignment = Alignment.new
+          (0 .. 4).each { |k| self.boxes[i + k][j].belongs_to(alignment) }
+          self.alignments << alignment
+        end
+      end
+      (0 .. 5).each do |i|
+        (0 .. 5).each do |j|
+          alignment = Alignment.new
+          (0 .. 4).each { |k| self.boxes[i + k][j + k].belongs_to(alignment) }
+          self.alignments << alignment
+        end
+      end
+      (0 .. 5).each do |i|
+        (0 .. 5).each do |j|
+          alignment = Alignment.new
+          (0 .. 4).each { |k| self.boxes[i + k][4 + j - k].belongs_to(alignment) }
+          self.alignments << alignment
+        end
       end
     end
     def check_box(pos_x, pos_y)
@@ -119,7 +153,12 @@ module Morpion
       end
       nb_identical_pieces == 5
     end
-
+    def debug_show
+      ba = g.board.alignments[0]
+      ba.boxes.each do |box|
+        box.player = :player_one
+      end
+    end
     def game_over(winner_s_nickname)
       puts "Game over! Winner is #{winner_s_nickname}!"
     end
@@ -130,8 +169,15 @@ module Morpion
     end
   end
 
+  class Alignment
+    attr_accessor :boxes
+    def initialize
+      self.boxes = []
+    end
+  end
+
   class Game
-    attr_accessor :board, :table_length
+    attr_accessor :board, :alignments
     def initialize
       self.board = Board.new
       @player_one_s_turn = true
@@ -183,3 +229,9 @@ module Morpion
     end
   end
 end
+
+# reload!; g = Morpion::Game.new; nil
+# g.board.alignments.count
+# ba = g.board.alignments[0]; nil
+# ba.boxes.each do |box| box.player = :player_one end; nil
+# g.show_board
