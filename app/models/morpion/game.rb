@@ -26,88 +26,100 @@ module Morpion
         self.boxes << (0 .. 9).map { |j| Box.new(i: i, j: j) }
       end
     end
-    def check_box(i, j)
-      self.boxes[i][j].player == :none
+    def check_box(pos_x, pos_y)
+      self.boxes[pos_y][pos_x].player == :none
     end
-    def set_box(i, j, player)
-      self.boxes[i][j].player = player
-      check_game
+    def set_box(pos_x, pos_y, player)
+      self.boxes[pos_y][pos_x].player = player
+      check_game(pos_x, pos_y, player)
     end
-    def check_game
-      (0 .. 9).each do |i| # Debut des lignes
-        check_row(i)
-      end
-      (0 .. 9).each do |i| # Debut des lignes
-        check_col(i)
-      end
-      (0 .. 5).each do |i| # Debut des lignes
-        check_diag_upper_left_to_lower_right(i)
-      end
-      (4 .. 9).each do |i| # Debut des lignes
-        check_diag_lower_left_to_upper_right(i)
-      end
-    end
-    def check_row(row)
-      (0 .. 5).each do |i| # Debut de la combinaison a analyser
-        combination = []
-        (0 .. 4).each do |j| # Combinaison a analyser
-          # puts "Checking row #{row} col #{i + j}" # Logs des scans
-          combination[j] = self.boxes[row][i + j].player
+    def check_game(pos_x, pos_y, player)
+      i, combination, game_over = -4, [], false
+      while !game_over && i <= 0 do
+        combination = check_row(pos_x + i, pos_y)
+        if combination.length == 5
+          game_over = check_win(combination, player)
         end
-        check_win(combination)
+        i += 1
       end
-    end
-    def check_col(col)
-      (0 .. 5).each do |i| # Debut de la combinaison a analyser
-        combination = []
-        (0 .. 4).each do |j| # Combinaison a analyser
-          # puts "Checking row #{i + j} col #{col}" # Logs des scans
-          combination[j] = self.boxes[i + j][col].player
+      i, combination = -4, []
+      while !game_over && i <= 0 do
+        combination = check_col(pos_x, pos_y + i)
+        if combination.length == 5
+          game_over = check_win(combination, player)
         end
-        check_win(combination)
+        i += 1
       end
-    end
-    def check_diag_upper_left_to_lower_right(row)
-      (0 .. 5).each do |i| # Debut de la combinaison a analyser
-        combination = []
-        (0 .. 4).each do |j| # Combinaison a analyser
-          # puts "Checking row #{row + j} col #{i + j}" # Logs des scans
-          combination[j] = self.boxes[row + j][i + j].player
+      i, combination = -4, []
+      while !game_over && i <= 0 do
+        combination = check_diag_upper_left_to_lower_right(pos_x + i, pos_y + i)
+        if combination.length == 5
+          game_over = check_win(combination, player)
         end
-        check_win(combination)
+        i += 1
       end
-    end
-    def check_diag_lower_left_to_upper_right(row)
-      (0 .. 5).each do |i| # Debut de la combinaison a analyser
-        combination = []
-        (0 .. 4).each do |j| # Combinaison a analyser
-          # puts "Checking row #{row - j} col #{i + j}" # Logs des scans
-          combination[j] = self.boxes[row - j][i + j].player
+      i, combination = -4, []
+      while !game_over && i <= 0 do
+        combination = check_diag_lower_left_to_upper_right(pos_x + i, pos_y - i)
+        if combination.length == 5
+          game_over = check_win(combination, player)
         end
-        check_win(combination)
+        i += 1
+      end
+      if game_over
+        game_over(player)
       end
     end
-    def check_win(combination)
+    def check_row(pos_x, pos_y)
+      combination = []
+      (0 .. 4).each do |i|
+        if pos_x + i >= 0 && pos_x + i <= 9
+          # puts "Checking row #{pos_y} col #{pos_x + i}" # Logs des scans
+          combination << self.boxes[pos_y][pos_x + i].player
+        end
+      end
+      combination
+    end
+    def check_col(pos_x, pos_y)
+      combination = []
+      (0 .. 4).each do |i|
+        if pos_y + i >= 0 && pos_y + i <= 9
+          # puts "Checking row #{pos_y + i} col #{pos_x}" # Logs des scans
+          combination << self.boxes[pos_y + i][pos_x].player
+        end
+      end
+      combination
+    end
+    def check_diag_upper_left_to_lower_right(pos_x, pos_y)
+      combination = []
+      (0 .. 4).each do |i|
+        if pos_x + i >= 0 && pos_x + i <= 9 && pos_y + i >= 0 && pos_y + i <= 9
+          # puts "Checking row #{pos_y + i} col #{pos_x + i}" # Logs des scans
+          combination << self.boxes[pos_y + i][pos_x + i].player
+        end
+      end
+      combination
+    end
+    def check_diag_lower_left_to_upper_right(pos_x, pos_y)
+      combination = []
+      (0 .. 4).each do |i|
+        if pos_x + i >= 0 && pos_x + i <= 9 && pos_y - i >= 0 && pos_y - i <= 9
+          # puts "Checking row #{pos_y - i} col #{pos_x + i}" # Logs des scans
+          combination << self.boxes[pos_y - i][pos_x + i].player
+        end
+      end
+      combination
+    end
+    def check_win(combination, player)
       nb_identical_pieces = 0
-      (1 .. 4).each do |j|
-        # print "Checking row #{row} col #{i + j - 1} and #{i + j} : " # Logs des scans, decocher aussi les puts ci-dessous
-        if combination[j - 1] == combination[j]
-          # puts "Same! #{self.boxes[row][i + j - 1]} & #{self.boxes[row][i + j]}" # Logs des scans
+      (0 .. combination.length).each do |i|
+        if combination[i] == player
           nb_identical_pieces += 1
-        else
-          # puts "Not same! #{self.boxes[row][i + j - 1]} & #{self.boxes[row][i + j]}" # Logs des scans
-          break # Casse l'analyse actuelle si combinaison non-gagnante afin d'optimiser les performances
-        end
-        if (nb_identical_pieces == 4)
-          case combination[0]
-          when :player_one
-            game_over(:player_one)
-          when :player_two
-            game_over(:player_two)
-          end
         end
       end
+      nb_identical_pieces == 5
     end
+
     def game_over(winner_s_nickname)
       puts "Game over! Winner is #{winner_s_nickname}!"
     end
@@ -124,19 +136,47 @@ module Morpion
       self.board = Board.new
       @player_one_s_turn = true
     end
-    def turn(i, j)
-      if self.board.check_box(i, j)
+    def turn(pos_x, pos_y)
+      if self.board.check_box(pos_x, pos_y)
         if @player_one_s_turn
           player_piece = :player_one
         else
           player_piece = :player_two
         end
-        self.board.set_box(i, j, player_piece)
-        @player_one_s_turn = !@player_one_s_turn
+        self.board.set_box(pos_x, pos_y, player_piece)
+        # @player_one_s_turn = !@player_one_s_turn
       else
         puts 'Box not free, try again...'
       end
       show_board
+    end
+    def row_win
+      random_x = Random.rand(6)
+      random_y = Random.rand(10)
+      (0 .. 4).each do |i|
+        turn(random_x + i, random_y)
+      end
+    end
+    def col_win
+      random_x = Random.rand(10)
+      random_y = Random.rand(6)
+      (0 .. 4).each do |i|
+        turn(random_x, random_y + i)
+      end
+    end
+    def diag_ul_lr_win
+      random_x = Random.rand(6)
+      random_y = Random.rand(6)
+      (0 .. 4).each do |i|
+        turn(random_x + i, random_y + i)
+      end
+    end
+    def diag_ll_ur_win
+      random_x = Random.rand(6)
+      random_y = Random.rand(6)
+      (0 .. 4).each do |i|
+        turn(random_x + i, random_y + 4 - i)
+      end
     end
     def show_board
       puts self.board
