@@ -96,7 +96,7 @@ module Morpion
           nb_identical_pieces += 1
         else
           # puts "Not same! #{self.boxes[row][i + j - 1]} & #{self.boxes[row][i + j]}" # Logs des scans
-          break # Casse l'analyse actuelle si combinaison non-gagnant afin d'optimiser les performances
+          break # Casse l'analyse actuelle si combinaison non-gagnante afin d'optimiser les performances
         end
         if (nb_identical_pieces == 4)
           case combination[0]
@@ -108,8 +108,8 @@ module Morpion
         end
       end
     end
-    def game_over(winner)
-      puts "Game over! Winner is player #{winner}"
+    def game_over(winner_s_nickname)
+      puts "Game over! Winner is #{winner_s_nickname}!"
     end
     def to_s
       s_col_sep = '|'
@@ -122,17 +122,17 @@ module Morpion
     attr_accessor :board, :table_length
     def initialize
       self.board = Board.new
-      @player_ones_turn = true
+      @player_one_s_turn = true
     end
     def turn(i, j)
       if self.board.check_box(i, j)
-        if @player_ones_turn
+        if @player_one_s_turn
           player_piece = :player_one
         else
           player_piece = :player_two
         end
         self.board.set_box(i, j, player_piece)
-        @player_ones_turn = !@player_ones_turn
+        @player_one_s_turn = !@player_one_s_turn
       else
         puts 'Box not free, try again...'
       end
