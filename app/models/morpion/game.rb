@@ -184,33 +184,8 @@ module Morpion
       end
     end
     def winning_shot
-      combination, nb_identical_pieces, game_over, winner_name = [], 0, false, ''
-      (0 .. 9).each do |i|
-        if !game_over
-          (0 .. 9).each do |j|
-            if !game_over
-              boxes[i][j].alignments.each do |alignment|
-                combination.clear
-                nb_identical_pieces = 0
-                alignment.boxes.each do |box|
-                  combination << box.player
-                end
-                (0 .. combination.length - 2).each do |k|
-                  if combination[k] == combination[k + 1] && combination[k] != :none
-                    nb_identical_pieces += 1
-                    winner_name = combination[k]
-                  end
-                end
-                if nb_identical_pieces == 4
-                  game_over = true
-                  game_over(winner_name)
-                  break
-                end
-              end
-            end
-          end
-        end
-      end
+      result = alignments.select { |alignment| alignment.is_won? }
+      result.count
     end
     def game_over(winner_s_nickname)
       puts "Game over! Winner is #{winner_s_nickname}!"
@@ -226,6 +201,10 @@ module Morpion
     attr_accessor :boxes
     def initialize
       self.boxes = []
+    end
+    def is_won?
+      combination = boxes.map(& :player).uniq
+      combination.count == 1 && combination.first != :none
     end
   end
 
