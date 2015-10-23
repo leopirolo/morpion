@@ -153,12 +153,18 @@ module Morpion
       end
       nb_identical_pieces == 5
     end
-    # def debug_show
-    #   ba = g.board.alignments[0]
-    #   ba.boxes.each do |box|
-    #     box.player = :player_one
-    #   end
-    # end
+    def debug_show
+      # Afficher toutes les combinaisons possibles
+      alignments.each do |alignment|
+        alignment.boxes.each do |box|
+          box.player = :player_one
+        end
+        puts self
+        alignment.boxes.each do |box|
+          box.player = :none
+        end
+      end
+    end
     def game_over(winner_s_nickname)
       puts "Game over! Winner is #{winner_s_nickname}!"
     end
@@ -229,9 +235,3 @@ module Morpion
     end
   end
 end
-
-# reload!; g = Morpion::Game.new; nil
-# g.board.alignments.count
-# ba = g.board.alignments[0]; nil
-# ba.boxes.each do |box| box.player = :player_one end; nil
-# g.show_board
