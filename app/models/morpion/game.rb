@@ -65,93 +65,6 @@ module Morpion
     end
     def set_box(pos_x, pos_y, player)
       self.boxes[pos_y][pos_x].player = player
-      check_game(pos_x, pos_y, player)
-    end
-    def check_game(pos_x, pos_y, player)
-      i, combination, game_over = -4, [], false
-      while !game_over && i <= 0 do
-        combination = check_row(pos_x + i, pos_y)
-        if combination.length == 5
-          game_over = check_win(combination, player)
-        end
-        i += 1
-      end
-      i, combination = -4, []
-      while !game_over && i <= 0 do
-        combination = check_col(pos_x, pos_y + i)
-        if combination.length == 5
-          game_over = check_win(combination, player)
-        end
-        i += 1
-      end
-      i, combination = -4, []
-      while !game_over && i <= 0 do
-        combination = check_diag_upper_left_to_lower_right(pos_x + i, pos_y + i)
-        if combination.length == 5
-          game_over = check_win(combination, player)
-        end
-        i += 1
-      end
-      i, combination = -4, []
-      while !game_over && i <= 0 do
-        combination = check_diag_lower_left_to_upper_right(pos_x + i, pos_y - i)
-        if combination.length == 5
-          game_over = check_win(combination, player)
-        end
-        i += 1
-      end
-      if game_over
-        game_over(player)
-      end
-    end
-    def check_row(pos_x, pos_y)
-      combination = []
-      (0 .. 4).each do |i|
-        if pos_x + i >= 0 && pos_x + i <= 9
-          # puts "Checking row #{pos_y} col #{pos_x + i}" # Logs des scans
-          combination << self.boxes[pos_y][pos_x + i].player
-        end
-      end
-      combination
-    end
-    def check_col(pos_x, pos_y)
-      combination = []
-      (0 .. 4).each do |i|
-        if pos_y + i >= 0 && pos_y + i <= 9
-          # puts "Checking row #{pos_y + i} col #{pos_x}" # Logs des scans
-          combination << self.boxes[pos_y + i][pos_x].player
-        end
-      end
-      combination
-    end
-    def check_diag_upper_left_to_lower_right(pos_x, pos_y)
-      combination = []
-      (0 .. 4).each do |i|
-        if pos_x + i >= 0 && pos_x + i <= 9 && pos_y + i >= 0 && pos_y + i <= 9
-          # puts "Checking row #{pos_y + i} col #{pos_x + i}" # Logs des scans
-          combination << self.boxes[pos_y + i][pos_x + i].player
-        end
-      end
-      combination
-    end
-    def check_diag_lower_left_to_upper_right(pos_x, pos_y)
-      combination = []
-      (0 .. 4).each do |i|
-        if pos_x + i >= 0 && pos_x + i <= 9 && pos_y - i >= 0 && pos_y - i <= 9
-          # puts "Checking row #{pos_y - i} col #{pos_x + i}" # Logs des scans
-          combination << self.boxes[pos_y - i][pos_x + i].player
-        end
-      end
-      combination
-    end
-    def check_win(combination, player)
-      nb_identical_pieces = 0
-      (0 .. combination.length).each do |i|
-        if combination[i] == player
-          nb_identical_pieces += 1
-        end
-      end
-      nb_identical_pieces == 5
     end
     # Afficher toutes les combinaisons possibles
     def debug_show_all_combination_possible
@@ -228,32 +141,11 @@ module Morpion
       end
       show_board
     end
-    def row_win
+    def let_me_win
       random_x = Random.rand(6)
       random_y = Random.rand(10)
       (0 .. 4).each do |i|
         turn(random_x + i, random_y)
-      end
-    end
-    def col_win
-      random_x = Random.rand(10)
-      random_y = Random.rand(6)
-      (0 .. 4).each do |i|
-        turn(random_x, random_y + i)
-      end
-    end
-    def diag_ul_lr_win
-      random_x = Random.rand(6)
-      random_y = Random.rand(6)
-      (0 .. 4).each do |i|
-        turn(random_x + i, random_y + i)
-      end
-    end
-    def diag_ll_ur_win
-      random_x = Random.rand(6)
-      random_y = Random.rand(6)
-      (0 .. 4).each do |i|
-        turn(random_x + i, random_y + 4 - i)
       end
     end
     def show_board
@@ -261,3 +153,6 @@ module Morpion
     end
   end
 end
+
+# Rails.logger.info/debug/ward/etc.
+# Rails.logger
