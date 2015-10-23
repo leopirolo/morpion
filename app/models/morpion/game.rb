@@ -60,7 +60,7 @@ module Morpion
         end
       end
     end
-    def check_box(pos_x, pos_y)
+    def is_free?(pos_x, pos_y)
       self.boxes[pos_y][pos_x].player == :none
     end
     def set_box(pos_x, pos_y, player)
@@ -98,13 +98,17 @@ module Morpion
     end
     def winning_shot
       result = alignments.select { |alignment| alignment.is_won? }
-      result.count
+      result.count > 0
+    end
+    def tying_shot
+      result = alignments.select { |alignment| !alignment.is_tie? }
+      result.count == 0
     end
     def game_over(winner_s_nickname)
       puts "Game over! Winner is #{winner_s_nickname}!"
     end
     def to_s
-      s_col_sep = '|'
+      s_col_sep = ' | '
       s_row_sep = "\n"
       (0 .. 9).map { |i| (0 .. 9).map { |j| self.boxes[i][j] }.join(s_col_sep) }.join(s_row_sep) # Affiche la board
     end
@@ -119,40 +123,54 @@ module Morpion
       combination = boxes.map(& :player).uniq
       combination.count == 1 && combination.first != :none
     end
+    def is_tie?
+      combination = boxes.map(& :player).uniq
+      combination.include?(:player_one) && combination.include?(:player_two)
+    end
   end
 
   class Game
     attr_accessor :board, :alignments
     def initialize
       self.board = Board.new
-      @player_one_s_turn = true
+      @player_one_s_turn, @game_over = true, false
+      player_s_turn
+    end
+    def player_s_turn
+      if @player_one_s_turn
+        puts "#{:player_one.capitalize}'s turn"
+      else
+        puts "#{:player_two.capitalize}'s turn"
+      end
     end
     def turn(pos_x, pos_y)
-      if self.board.check_box(pos_x, pos_y)
-        if @player_one_s_turn
-          player_piece = :player_one
+      if !@game_over
+        if self.board.is_free?(pos_x, pos_y)
+          if @player_one_s_turn
+            player_piece = :player_one
+          else
+            player_piece = :player_two
+          end
+          self.board.set_box(pos_x, pos_y, player_piece)
+          if self.board.winning_shot
+            self.board.game_over(player_piece)
+            @game_over = true
+          elsif self.board.tying_shot
+            puts 'Sorry, no winner this time'
+            @game_over = true
+          end
+          # @player_one_s_turn = !@player_one_s_turn
         else
-          player_piece = :player_two
+          puts 'Box not free, try again...'
         end
-        self.board.set_box(pos_x, pos_y, player_piece)
-        # @player_one_s_turn = !@player_one_s_turn
+        show_board
       else
-        puts 'Box not free, try again...'
-      end
-      show_board
-    end
-    def let_me_win
-      random_x = Random.rand(6)
-      random_y = Random.rand(10)
-      (0 .. 4).each do |i|
-        turn(random_x + i, random_y)
+        puts 'Game is over, launch a new one if you want to play'
       end
     end
     def show_board
       puts self.board
+      player_s_turn
     end
   end
 end
-
-# Rails.logger.info/debug/ward/etc.
-# Rails.logger
