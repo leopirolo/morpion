@@ -153,8 +153,8 @@ module Morpion
       end
       nb_identical_pieces == 5
     end
-    def debug_show
-      # Afficher toutes les combinaisons possibles
+    # Afficher toutes les combinaisons possibles
+    def debug_show_all_combination_possible
       alignments.each do |alignment|
         alignment.boxes.each do |box|
           box.player = :player_one
@@ -162,6 +162,53 @@ module Morpion
         puts self
         alignment.boxes.each do |box|
           box.player = :none
+        end
+      end
+    end
+    # Afficher toutes les combinaisons possibles relatives à une box
+    def debug_show
+      (0 .. 9).each do |i|
+        (0 .. 9).each do |j|
+          boxes[i][j].alignments.each do |alignment|
+            alignment.boxes.each do |box|
+              box.player = :player_one
+            end
+          end
+          puts self
+          boxes[i][j].alignments.each do |alignment|
+            alignment.boxes.each do |box|
+              box.player = :none
+            end
+          end
+        end
+      end
+    end
+    def winning_shot
+      combination, nb_identical_pieces, game_over, winner_name = [], 0, false, ''
+      (0 .. 9).each do |i|
+        if !game_over
+          (0 .. 9).each do |j|
+            if !game_over
+              boxes[i][j].alignments.each do |alignment|
+                combination.clear
+                nb_identical_pieces = 0
+                alignment.boxes.each do |box|
+                  combination << box.player
+                end
+                (0 .. combination.length - 2).each do |k|
+                  if combination[k] == combination[k + 1] && combination[k] != :none
+                    nb_identical_pieces += 1
+                    winner_name = combination[k]
+                  end
+                end
+                if nb_identical_pieces == 4
+                  game_over = true
+                  game_over(winner_name)
+                  break
+                end
+              end
+            end
+          end
         end
       end
     end
