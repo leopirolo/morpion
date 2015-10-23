@@ -96,6 +96,24 @@ module Morpion
         end
       end
     end
+    def computer_priority
+      priority = [1, 2, 3, 4, 5]
+      best_priority, best_pos_x, best_pos_y = 0, 0, 0
+      # box = alignments.select { |alignment| alignment.boxes.map(& :player_one) }
+      # priority[box.count]
+      (0 .. 9).each do |i|
+        (0 .. 9).each do |j|
+          temp_priority = 0
+          boxes[i][j].alignments.each do |alignment|
+            alignment.boxes.each do |box|
+              if box.player = :player_one
+                temp_priority += 1
+              end
+            end
+          end
+        end
+      end
+    end
     def winning_shot
       result = alignments.select { |alignment| alignment.is_won? }
       result.count > 0
