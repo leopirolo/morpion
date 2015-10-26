@@ -1,4 +1,4 @@
-module Morpion
+module MorpionLeo
   class Box
     attr_accessor :i, :j, :player, :alignments
     def initialize(i:, j:)
@@ -14,7 +14,7 @@ module Morpion
     def to_s
       case player
       when :none
-        '.'
+        ' '
       when :player_one
         'O'
       when :player_two
@@ -97,22 +97,7 @@ module Morpion
       end
     end
     def computer_priority
-      priority = [1, 2, 3, 4, 5]
-      best_priority, best_pos_x, best_pos_y = 0, 0, 0
-      # box = alignments.select { |alignment| alignment.boxes.map(& :player_one) }
-      # priority[box.count]
-      (0 .. 9).each do |i|
-        (0 .. 9).each do |j|
-          temp_priority = 0
-          boxes[i][j].alignments.each do |alignment|
-            alignment.boxes.each do |box|
-              if box.player = :player_one
-                temp_priority += 1
-              end
-            end
-          end
-        end
-      end
+
     end
     def winning_shot
       result = alignments.select { |alignment| alignment.is_won? }
@@ -175,7 +160,7 @@ module Morpion
             @game_over = true
           elsif self.board.tying_shot
             puts 'Sorry, no winner this time'
-            @game_over = true
+            @game_over = true
           end
           # @player_one_s_turn = !@player_one_s_turn
         else
