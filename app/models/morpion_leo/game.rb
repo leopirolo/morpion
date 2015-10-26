@@ -171,79 +171,49 @@ module MorpionLeo
     attr_accessor :board, :alignments
     def initialize
       self.board = Board.new
-      @player_one_s_turn, @game_over = true, false
-      player_s_turn
-    end
-    def player_s_turn
-      if @player_one_s_turn
-        puts "#{:player_one.capitalize}'s turn"
-      else
-        puts "#{:player_two.capitalize}'s turn"
-      end
+      @game_over = false
     end
     def play(pos_x, pos_y)
       if !@game_over
         if self.board.is_free?(pos_x, pos_y)
-          if @player_one_s_turn
-            player_piece = :player_one
-          else
-            player_piece = :player_two
-          end
-          self.board.set_box(pos_x, pos_y, player_piece)
+          self.board.set_box(pos_x, pos_y, :player_one)
           if self.board.winning_shot
-            self.board.game_over(player_piece)
+            self.board.game_over(:player_one)
             @game_over = true
+            return { status: :user_won, i: pos_y, j: pos_x }
           elsif self.board.tying_shot
             puts 'Sorry, no winner this time'
             @game_over = true
+            return { status: :tie, i: pos_y, j: pos_x }
           end
-          # @player_one_s_turn = !@player_one_s_turn
         else
           puts 'Box not free, try again...'
         end
         show_board
+        { status: :continue, i: pos_y, j: pos_x }
       else
         puts 'Game is over, launch a new one if you want to play'
       end
     end
     def play_computer
       if !@game_over
-        if @player_one_s_turn
-          player_piece = :player_one
-        else
-          player_piece = :player_two
-        end
         best_box_to_play = self.board.computer_priority
-        self.board.set_box(best_box_to_play[:pos_x], best_box_to_play[:pos_y], player_piece)
+        self.board.set_box(best_box_to_play[:pos_x], best_box_to_play[:pos_y], :player_two)
         if self.board.winning_shot
-          self.board.game_over(player_piece)
+          self.board.game_over(:player_two)
           @game_over = true
+          return { status: :computer_won, i: best_box_to_play[:pos_y], j: best_box_to_play[:pos_x] }
         elsif self.board.tying_shot
           puts 'Sorry, no winner this time'
           @game_over = true
+          return { status: :tie, i: best_box_to_play[:pos_y], j: best_box_to_play[:pos_x] }
         end
-        @player_one_s_turn = !@player_one_s_turn
       end
       show_board
-	    # { status: [:user_won | :computer_won | :tie | :continue ] , i: , j: }
+      { status: :continue, i: best_box_to_play[:pos_y], j: best_box_to_play[:pos_x] }
     end
     def show_board
       puts self.board
-      if !@game_over
-        player_s_turn
-      end
     end
   end
-
-  # load("morpion.rb")
-  # g1 = Morpion::Game.new
-  # g2 = Morpion::Game.new
-  # ref = g1
-  # 1000.times {
-  #   g = g1; g1 = g2; g2 = g
-  #   r = g1.play_computer
-  #   raise "END #{r[:status]}" unless r[:status] == :continue
-  #   r = g2.play(r[:i],r[:j])
-  #   raise "END #{r[:status]}" unless r[:status] == :continue
-  # }
 end
