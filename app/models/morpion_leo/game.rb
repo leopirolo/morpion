@@ -97,7 +97,31 @@ module MorpionLeo
       end
     end
     def computer_priority
+      tab_ref_value, tab_score = [1, 2, 3, 4], []
+      (0 .. 9).each do |i|
+        (0 .. 9).each do |j|
+          if boxes[i][j].player == :none
+            current_score = 0
+            boxes[i][j].alignments.each do |alignment|
+              unless alignment.is_tie?
+                player_one_s_alignment = alignment.boxes.select { |box| box.player == :player_one }
+                player_two_s_alignment = alignment.boxes.select { |box| box.player == :player_two }
+                if player_one_s_alignment.count > 0
+                  current_score += tab_ref_value[alignment.boxes.count(:player_one)]
+                elsif player_two_s_alignment.count > 0
+                  current_score += tab_ref_value[alignment.boxes.count(:player_two)]
+                else
+                  current_score += tab_ref_value[0]
+                end
+              end
+            end
+            tab_score << { score: current_score, pos_x: i, pos_y: j }
+          end
+        end
+      end
 
+      
+      Rails.logger.info tab_score.join("\n")
     end
     def winning_shot
       result = alignments.select { |alignment| alignment.is_won? }
@@ -146,7 +170,7 @@ module MorpionLeo
         puts "#{:player_two.capitalize}'s turn"
       end
     end
-    def turn(pos_x, pos_y)
+    def play(pos_x, pos_y)
       if !@game_over
         if self.board.is_free?(pos_x, pos_y)
           if @player_one_s_turn
@@ -171,9 +195,29 @@ module MorpionLeo
         puts 'Game is over, launch a new one if you want to play'
       end
     end
+    def play_computer
+      if !@game_over
+        computer_priority
+      end
+	    # { status: [:user_won | :computer_won | :tie | :continue ] , i: , j: }
+    end
     def show_board
       puts self.board
-      player_s_turn
+      if !@game_over
+        player_s_turn
+      end
     end
   end
+
+  # load("morpion.rb")
+  # g1 = Morpion::Game.new
+  # g2 = Morpion::Game.new
+  # ref = g1
+  # 1000.times {
+  #   g = g1; g1 = g2; g2 = g
+  #   r = g1.play_computer
+  #   raise "END #{r[:status]}" unless r[:status] == :continue
+  #   r = g2.play(r[:i],r[:j])
+  #   raise "END #{r[:status]}" unless r[:status] == :continue
+  # }
 end
