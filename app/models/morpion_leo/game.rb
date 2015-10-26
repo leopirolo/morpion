@@ -97,19 +97,20 @@ module MorpionLeo
       end
     end
     def computer_priority
-      tab_ref_value, tab_score = [1, 2, 3, 4], []
+      tab_ref_value, tab_score, tab_best_score = [10, 50, 2000, 10000, 100000], [], []
       (0 .. 9).each do |i|
         (0 .. 9).each do |j|
-          if boxes[i][j].player == :none
+          if boxes[j][i].player == :none
             current_score = 0
-            boxes[i][j].alignments.each do |alignment|
+            boxes[j][i].alignments.each do |alignment|
               unless alignment.is_tie?
                 player_one_s_alignment = alignment.boxes.select { |box| box.player == :player_one }
                 player_two_s_alignment = alignment.boxes.select { |box| box.player == :player_two }
                 if player_one_s_alignment.count > 0
-                  current_score += tab_ref_value[alignment.boxes.count(:player_one)]
+                  Rails.logger.info tab_ref_value[player_one_s_alignment.count]
+                  current_score += tab_ref_value[player_one_s_alignment.count]
                 elsif player_two_s_alignment.count > 0
-                  current_score += tab_ref_value[alignment.boxes.count(:player_two)]
+                  current_score += tab_ref_value[player_two_s_alignment.count]
                 else
                   current_score += tab_ref_value[0]
                 end
@@ -119,9 +120,19 @@ module MorpionLeo
           end
         end
       end
-
-      
+      tab_score = tab_score.sort_by { |hash| hash[:score] }.reverse
+      tab_best_score << tab_score[0]
       Rails.logger.info tab_score.join("\n")
+      (0 .. tab_score.length - 2).each do |i|
+        if tab_score[i][:score] == tab_score[i + 1][:score]
+          tab_best_score << tab_score[i + 1]
+        else
+          break
+        end
+      end
+      Rails.logger.info ' .. '
+      Rails.logger.info tab_best_score.join("\n")
+      tab_best_score[Random.rand(tab_best_score.length)]
     end
     def winning_shot
       result = alignments.select { |alignment| alignment.is_won? }
@@ -197,8 +208,23 @@ module MorpionLeo
     end
     def play_computer
       if !@game_over
-        computer_priority
+        if @player_one_s_turn
+          player_piece = :player_one
+        else
+          player_piece = :player_two
+        end
+        best_box_to_play = self.board.computer_priority
+        self.board.set_box(best_box_to_play[:pos_x], best_box_to_play[:pos_y], player_piece)
+        if self.board.winning_shot
+          self.board.game_over(player_piece)
+          @game_over = true
+        elsif self.board.tying_shot
+          puts 'Sorry, no winner this time'
+          @game_over = true
+        end
+        @player_one_s_turn = !@player_one_s_turn
       end
+      show_board
 	    # { status: [:user_won | :computer_won | :tie | :continue ] , i: , j: }
     end
     def show_board
