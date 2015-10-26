@@ -67,7 +67,7 @@ module MorpionFrancesco
       self.boxes[pos_y][pos_x].player = player
     end
     def computer_priority
-      tab_ref_value, tab_score, tab_best_score = [50, 200, 1000, 4000, 10000], [], []
+      tab_ref_player_one_value, tab_ref_player_two_value, tab_score, tab_best_score = [1, 2, 50, 500, 100000], [2, 4, 100, 1000, 200000], [], []
       (0 .. 9).each do |i|
         (0 .. 9).each do |j|
           if boxes[j][i].player == :none
@@ -77,11 +77,11 @@ module MorpionFrancesco
                 player_one_s_alignment = alignment.boxes.select { |box| box.player == :player_one }
                 player_two_s_alignment = alignment.boxes.select { |box| box.player == :player_two }
                 if player_one_s_alignment.count > 0
-                  current_score += tab_ref_value[player_one_s_alignment.count]
+                  current_score += tab_ref_player_one_value[player_one_s_alignment.count]
                 elsif player_two_s_alignment.count > 0
-                  current_score += tab_ref_value[player_two_s_alignment.count]
+                  current_score += tab_ref_player_two_value[player_two_s_alignment.count]
                 else
-                  current_score += tab_ref_value[0]
+                  current_score += tab_ref_player_one_value[0]
                 end
               end
             end
