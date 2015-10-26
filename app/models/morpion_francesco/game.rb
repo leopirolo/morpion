@@ -1,4 +1,4 @@
-module MorpionLeo
+module MorpionFrancesco
   class Box
     attr_accessor :i, :j, :player, :alignments
     def initialize(i:, j:)
@@ -67,7 +67,7 @@ module MorpionLeo
       self.boxes[pos_y][pos_x].player = player
     end
     def computer_priority
-      tab_ref_value, tab_score, tab_best_score = [10, 50, 2000, 10000, 100000], [], []
+      tab_ref_value, tab_score, tab_best_score = [50, 200, 1000, 4000, 10000], [], []
       (0 .. 9).each do |i|
         (0 .. 9).each do |j|
           if boxes[j][i].player == :none
