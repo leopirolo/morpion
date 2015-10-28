@@ -67,7 +67,7 @@ module MorpionFrancesco
       self.boxes[pos_y][pos_x].player = player
     end
     def computer_priority
-      tab_ref_player_one_value, tab_ref_player_two_value, tab_score, tab_best_score = [1, 2, 50, 500, 100000], [2, 4, 100, 1000, 200000], [], []
+      tab_ref_player_one_value, tab_ref_player_two_value, tab_score, tab_best_score = [1, 2, 50, 500, 5000], [2, 4, 100, 1000, 10000], [], []
       (0 .. 9).each do |i|
         (0 .. 9).each do |j|
           if boxes[j][i].player == :none
