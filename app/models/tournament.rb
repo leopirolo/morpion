@@ -1,7 +1,7 @@
 class Tournament
 	attr_accessor :klass1, :klass2
 
-	# Usage : t = Tournament.new(MorpionLeo::Game, MorpionFrancesco::Game); t.run
+	# Usage : reload!; t = Tournament.new(MorpionLeo::Game, MorpionFrancesco::Game); t.run
 	def initialize(klass1,klass2)
 		self.klass1 = klass1
 		self.klass2 = klass2
